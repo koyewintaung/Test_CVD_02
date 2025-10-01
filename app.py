@@ -6,6 +6,7 @@ import plotly.express as px  # For interactive charts like sunkey and more
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+import numpy as np
 
 # Load the dataset
 @st.cache_data  # Cache the data to avoid reloading on every interaction
@@ -94,7 +95,24 @@ if uploaded_file is not None:
     if 'target' in data.columns:
         X = data.drop('target', axis=1, errors='ignore')
         y = data['target']
+
+        # Ensure numeric data types in X
+        X = X.select_dtypes(include=['number'])
+
+        # Split data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        # Handle missing values
+        X_train = X_train.fillna(0)
+        X_test = X_test.fillna(0)
+
+        # Remove infinite values
+        X_train.replace([np.inf, -np.inf], np.nan, inplace=True)
+        X_test.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+        # Fill remaining NaN values with the mean
+        X_train.fillna(X_train.mean(), inplace=True)
+        X_test.fillna(X_test.mean(), inplace=True)
 
         # Train a Logistic Regression model
         model = LogisticRegression(max_iter=1000)
