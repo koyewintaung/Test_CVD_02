@@ -29,10 +29,10 @@ st.markdown("""
     <style>
         body {
             color: #fff;
-            background-color: #DC143C;
+            background-color: #FFECC0;
         }
         .stApp {
-            background-color: #FFECC0;
+            background-color: #262730;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -56,7 +56,7 @@ if image:
         unsafe_allow_html=True
     )
 else:
-    st.title("Data Analysis and Visualization App")
+    st.title("RESEARCH DATA ANALYSIS")
 
 st.header("Explore Your Data with Interactive Charts and Analysis")
 
