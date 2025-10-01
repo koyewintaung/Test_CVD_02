@@ -11,10 +11,9 @@ from PIL import Image
 import base64
 
 # Helper function to convert image to base64
-def img_to_bytes(img):
-    img_bytes = img.tobytes()
-    encoded = base64.b64encode(img_bytes).decode()
-    return encoded
+def img_to_bytes(img_path):
+    with open(img_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode('utf-8')
 
 # Set page configuration
 st.set_page_config(
@@ -29,10 +28,10 @@ st.markdown("""
     <style>
         body {
             color: #000; /* Black text */
-            background-color: #f0f0f0; /* Light gray background */
+            background-color: #CADCAE; /* Light green background */
         }
         .stApp {
-            background-color: #f0f0f0; /* Light gray background */
+            background-color: #CADCAE; /* Light greeen background */
         }
         .st-bb { /* Streamlit main content */
             background-color: #fff; /* White background for content area */
@@ -46,24 +45,18 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Load the image
+image_path = "chart icon01.png"
 try:
-    image = Image.open("chart icon01.png")
-except FileNotFoundError:
-    st.warning("Image file 'chart icon01.png' not found. Please make sure it is in the same directory as the script.")
-    image = None
-
-# Display the image and the title using Markdown
-if image:
-    st.markdown(
-        f"""
+    image_base64 = img_to_bytes(image_path)
+    image_html = f"""
         <div style="display: flex; align-items: center;">
-            <img src="data:image/png;base64,{img_to_bytes(image)}" alt="Chart Icon" style="margin-right: 10px; height: 50px;">
+            <img src="data:image/png;base64,{image_base64}" alt="Chart Icon" style="margin-right: 10px; height: 50px;">
             <h1 style="display: inline;">RESEARCH DATA ANALYSIS</h1>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-else:
+        """
+    st.markdown(image_html, unsafe_allow_html=True)
+except FileNotFoundError:
+    st.warning(f"Image file '{image_path}' not found. Please make sure it is in the same directory as the script.")
     st.title("RESEARCH DATA ANALYSIS")
 
 st.header("Explore Your Data with Interactive Charts and Analysis")
