@@ -18,7 +18,7 @@ def img_to_bytes(img):
 
 # Set page configuration
 st.set_page_config(
-    page_title="Data Analysis App",
+    page_title="RESEARCH DATA ANALYSIS",
     page_icon=":bar_chart:",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -28,11 +28,19 @@ st.set_page_config(
 st.markdown("""
     <style>
         body {
-            color: #fff;
-            background-color: #FFECC0;
+            color: #000; /* Black text */
+            background-color: #f0f0f0; /* Light gray background */
         }
         .stApp {
-            background-color: #262730;
+            background-color: #f0f0f0; /* Light gray background */
+        }
+        .st-bb { /* Streamlit main content */
+            background-color: #fff; /* White background for content area */
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .st-at { /* Streamlit sidebar */
+            background-color: #e0e0e0; /* Light gray sidebar background */
         }
     </style>
     """, unsafe_allow_html=True)
@@ -50,7 +58,7 @@ if image:
         f"""
         <div style="display: flex; align-items: center;">
             <img src="data:image/png;base64,{img_to_bytes(image)}" alt="Chart Icon" style="margin-right: 10px; height: 50px;">
-            <h1 style="display: inline;">Data Analysis and Visualization App</h1>
+            <h1 style="display: inline;">RESEARCH DATA ANALYSIS</h1>
         </div>
         """,
         unsafe_allow_html=True
