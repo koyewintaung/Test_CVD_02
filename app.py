@@ -70,18 +70,21 @@ if uploaded_file is not None:
     st.write("### Simple Machine Learning Model")
 
     # Prepare data for machine learning
-    X = data.drop('target', axis=1)
-    y = data['target']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    if 'target' in data.columns:
+        X = data.drop('target', axis=1)
+        y = data['target']
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Train a Logistic Regression model
-    model = LogisticRegression(max_iter=1000)
-    model.fit(X_train, y_train)
+        # Train a Logistic Regression model
+        model = LogisticRegression(max_iter=1000)
+        model.fit(X_train, y_train)
 
-    # Make predictions and evaluate the model
-    y_pred = model.predict(X_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    st.write(f"#### Accuracy: {accuracy}")
+        # Make predictions and evaluate the model
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        st.write(f"#### Accuracy: {accuracy}")
+    else:
+        st.write("Target column 'target' not found in the dataset.")
 
     # Additional Charts
     st.write("### Additional Charts")
@@ -90,15 +93,20 @@ if uploaded_file is not None:
                                "100% Stacked Bar Chart", "Stacked Vertical Bar Chart",
                                "Line Chart"])
 
+    st.write(f"Selected chart type: {chart_type}")  # Debugging line
+
     if chart_type == "Bar Chart":
         column_x = st.selectbox("Select X axis for Bar Chart", data.columns)
         column_y = st.selectbox("Select Y axis for Bar Chart", data.columns)
+        st.write(f"Selected X column: {column_x}")  # Debugging line
+        st.write(f"Selected Y column: {column_y}")  # Debugging line
         if column_x and column_y:
             fig = px.bar(data, x=column_x, y=column_y)
             st.plotly_chart(fig)
 
     elif chart_type == "Pie Chart":
         column = st.selectbox("Select column for Pie Chart", data.columns)
+        st.write(f"Selected column: {column}")  # Debugging line
         if column:
             fig = px.pie(data, names=column)
             st.plotly_chart(fig)
@@ -107,6 +115,9 @@ if uploaded_file is not None:
         source = st.selectbox("Select source column for Sunkey Diagram", data.columns)
         target = st.selectbox("Select target column for Sunkey Diagram", data.columns)
         values = st.selectbox("Select values column for Sunkey Diagram", data.columns)
+        st.write(f"Selected source column: {source}")  # Debugging line
+        st.write(f"Selected target column: {target}")  # Debugging line
+        st.write(f"Selected values column: {values}")  # Debugging line
         if source and target and values:
             fig = px.sunburst(data, path=[source, target], values=values)
             st.plotly_chart(fig)
@@ -115,6 +126,9 @@ if uploaded_file is not None:
         column_x = st.selectbox("Select X axis for 100% Stacked Bar Chart", data.columns)
         column_y = st.selectbox("Select Y axis for 100% Stacked Bar Chart", data.columns)
         color = st.selectbox("Select color column for 100% Stacked Bar Chart", data.columns)
+        st.write(f"Selected X column: {column_x}")  # Debugging line
+        st.write(f"Selected Y column: {column_y}")  # Debugging line
+        st.write(f"Selected color column: {color}")  # Debugging line
         if column_x and column_y and color:
             # Group data and calculate percentages
             grouped = data.groupby([column_x, color])[column_y].sum().unstack().fillna(0)
@@ -128,6 +142,9 @@ if uploaded_file is not None:
         column_x = st.selectbox("Select X axis for Stacked Vertical Bar Chart", data.columns)
         column_y = st.selectbox("Select Y axis for Stacked Vertical Bar Chart", data.columns)
         color = st.selectbox("Select color column for Stacked Vertical Bar Chart", data.columns)
+        st.write(f"Selected X column: {column_x}")  # Debugging line
+        st.write(f"Selected Y column: {column_y}")  # Debugging line
+        st.write(f"Selected color column: {color}")  # Debugging line
         if column_x and column_y and color:
             fig = px.bar(data, x=column_x, y=column_y, color=color,
                          title='Stacked Vertical Bar Chart')
@@ -136,6 +153,8 @@ if uploaded_file is not None:
     elif chart_type == "Line Chart":
         column_x = st.selectbox("Select X axis for Line Chart", data.columns)
         column_y = st.selectbox("Select Y axis for Line Chart", data.columns)
+        st.write(f"Selected X column: {column_x}")  # Debugging line
+        st.write(f"Selected Y column: {column_y}")  # Debugging line
         if column_x and column_y:
             fig = px.line(data, x=column_x, y=column_y,
                           title='Line Chart')
