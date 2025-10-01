@@ -29,7 +29,34 @@ if uploaded_file is not None:
     st.dataframe(data.describe())
 
     # Data Visualization
-    st.write("### Data Visualization")
+    st.write("### Data Types")
+    st.write(data.dtypes)
+
+    # Handle non-numeric columns
+    non_numeric_cols = data.select_dtypes(exclude=['number']).columns
+    st.write("Non-numeric columns:", non_numeric_cols)
+
+    # Option 1: Remove non-numeric columns
+    data_numeric = data.drop(non_numeric_cols, axis=1, errors='ignore')
+
+    # Option 2: Try to convert non-numeric columns to numeric
+    # for col in non_numeric_cols:
+    #     try:
+    #         data[col] = pd.to_numeric(data[col])
+    #     except ValueError:
+    #         st.write(f"Could not convert column {col} to numeric.")
+
+    # Handle missing values
+    data_numeric = data_numeric.fillna(0)
+
+    # Correlation heatmap
+    st.write("### Correlation Heatmap")
+    try:
+        fig, ax = plt.subplots(figsize=(12, 10))
+        sns.heatmap(data_numeric.corr(), annot=True, cmap="coolwarm", linewidths=.5, ax=ax)
+        st.pyplot(fig)
+    except Exception as e:
+        st.write(f"Error creating heatmap: {e}")
 
     # Choose columns for histogram
     hist_columns = st.multiselect("Select columns for histogram", data.columns)
@@ -51,12 +78,6 @@ if uploaded_file is not None:
         sns.scatterplot(data=data, x=x_column, y=y_column, ax=ax)
         st.pyplot(fig)
 
-    # Correlation heatmap
-    st.write("#### Correlation Heatmap")
-    fig, ax = plt.subplots(figsize=(12, 10))
-    sns.heatmap(data.corr(), annot=True, cmap="coolwarm", linewidths=.5, ax=ax)
-    st.pyplot(fig)
-
     # Basic Data Analysis
     st.write("### Basic Data Analysis")
 
@@ -71,7 +92,7 @@ if uploaded_file is not None:
 
     # Prepare data for machine learning
     if 'target' in data.columns:
-        X = data.drop('target', axis=1)
+        X = data.drop('target', axis=1, errors='ignore')
         y = data['target']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
