@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px  # For interactive charts like sunkey and more
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -81,6 +82,64 @@ if uploaded_file is not None:
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     st.write(f"#### Accuracy: {accuracy}")
+
+    # Additional Charts
+    st.write("### Additional Charts")
+    chart_type = st.selectbox("Select chart type",
+                              ["Bar Chart", "Pie Chart", "Sunkey Diagram",
+                               "100% Stacked Bar Chart", "Stacked Vertical Bar Chart",
+                               "Line Chart"])
+
+    if chart_type == "Bar Chart":
+        column_x = st.selectbox("Select X axis for Bar Chart", data.columns)
+        column_y = st.selectbox("Select Y axis for Bar Chart", data.columns)
+        if column_x and column_y:
+            fig = px.bar(data, x=column_x, y=column_y)
+            st.plotly_chart(fig)
+
+    elif chart_type == "Pie Chart":
+        column = st.selectbox("Select column for Pie Chart", data.columns)
+        if column:
+            fig = px.pie(data, names=column)
+            st.plotly_chart(fig)
+
+    elif chart_type == "Sunkey Diagram":
+        source = st.selectbox("Select source column for Sunkey Diagram", data.columns)
+        target = st.selectbox("Select target column for Sunkey Diagram", data.columns)
+        values = st.selectbox("Select values column for Sunkey Diagram", data.columns)
+        if source and target and values:
+            fig = px.sunburst(data, path=[source, target], values=values)
+            st.plotly_chart(fig)
+
+    elif chart_type == "100% Stacked Bar Chart":
+        column_x = st.selectbox("Select X axis for 100% Stacked Bar Chart", data.columns)
+        column_y = st.selectbox("Select Y axis for 100% Stacked Bar Chart", data.columns)
+        color = st.selectbox("Select color column for 100% Stacked Bar Chart", data.columns)
+        if column_x and column_y and color:
+            # Group data and calculate percentages
+            grouped = data.groupby([column_x, color])[column_y].sum().unstack().fillna(0)
+            grouped = grouped.div(grouped.sum(axis=1), axis=0) * 100
+            fig = px.bar(grouped, x=grouped.index, y=grouped.columns,
+                         labels={'value': 'Percentage'},
+                         title='100% Stacked Bar Chart')
+            st.plotly_chart(fig)
+
+    elif chart_type == "Stacked Vertical Bar Chart":
+        column_x = st.selectbox("Select X axis for Stacked Vertical Bar Chart", data.columns)
+        column_y = st.selectbox("Select Y axis for Stacked Vertical Bar Chart", data.columns)
+        color = st.selectbox("Select color column for Stacked Vertical Bar Chart", data.columns)
+        if column_x and column_y and color:
+            fig = px.bar(data, x=column_x, y=column_y, color=color,
+                         title='Stacked Vertical Bar Chart')
+            st.plotly_chart(fig)
+
+    elif chart_type == "Line Chart":
+        column_x = st.selectbox("Select X axis for Line Chart", data.columns)
+        column_y = st.selectbox("Select Y axis for Line Chart", data.columns)
+        if column_x and column_y:
+            fig = px.line(data, x=column_x, y=column_y,
+                          title='Line Chart')
+            st.plotly_chart(fig)
 
 else:
     st.warning("Please upload a CSV or Excel file to proceed.")
