@@ -30,7 +30,7 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # App title and header
-st.title("Data Analysis and Visualization App")
+st.title("Research Data Analysis")
 st.header("Explore Your Data with Interactive Charts and Analysis")
 
 # Sidebar for settings
