@@ -7,6 +7,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import numpy as np
+from PIL import Image
+import base64
+
+# Helper function to convert image to base64
+def img_to_bytes(img):
+    img_bytes = img.tobytes()
+    encoded = base64.b64encode(img_bytes).decode()
+    return encoded
 
 # Set page configuration
 st.set_page_config(
@@ -21,16 +29,35 @@ st.markdown("""
     <style>
         body {
             color: #fff;
-            background-color: #DC143C;
+            background-color: #262730;
         }
         .stApp {
-            background-color: #FFECC0;
+            background-color: #262730;
         }
     </style>
     """, unsafe_allow_html=True)
 
-# App title and header
-st.title("Research Data Analysis")
+# Load the image
+try:
+    image = Image.open("chart icon01.png")
+except FileNotFoundError:
+    st.warning("Image file 'chart icon01.png' not found. Please make sure it is in the same directory as the script.")
+    image = None
+
+# Display the image and the title using Markdown
+if image:
+    st.markdown(
+        f"""
+        <div style="display: flex; align-items: center;">
+            <img src="data:image/png;base64,{img_to_bytes(image)}" alt="Chart Icon" style="margin-right: 10px; height: 50px;">
+            <h1 style="display: inline;">Data Analysis and Visualization App</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.title("Data Analysis and Visualization App")
+
 st.header("Explore Your Data with Interactive Charts and Analysis")
 
 # Sidebar for settings
