@@ -21,7 +21,7 @@ st.markdown("""
     <style>
         body {
             color: #fff;
-            background-color: #DC143C;
+            background-color: #262730;
         }
         .stApp {
             background-color: #262730;
@@ -33,11 +33,15 @@ st.markdown("""
 st.title("Data Analysis and Visualization App")
 st.header("Explore Your Data with Interactive Charts and Analysis")
 
-# Sidebar for settings
+# Sidebar for chart settings
 with st.sidebar:
-    st.header("Settings")
-    show_data = st.checkbox("Show Data Preview", value=True)
-    show_descriptive_stats = st.checkbox("Show Descriptive Statistics", value=True)
+    st.header("Chart Settings")
+    selected_charts = st.multiselect(
+        "Select chart types",
+        ["Bar Chart", "Pie Chart", "Sunkey Diagram",
+         "100% Stacked Bar Chart", "Stacked Vertical Bar Chart",
+         "Line Chart"]
+    )
 
 # Load the dataset
 @st.cache_data  # Cache the data to avoid reloading on every interaction
@@ -54,15 +58,13 @@ if uploaded_file is not None:
     file_type = uploaded_file.name.split('.')[-1].lower()
     data = load_data(uploaded_file, file_type)
 
-    # Display data preview if checked
-    if show_data:
-        st.markdown("### Data Preview")
-        st.dataframe(data.head())
+    # Display data preview
+    st.markdown("### Data Preview")
+    st.dataframe(data.head())
 
-    # Display descriptive statistics if checked
-    if show_descriptive_stats:
-        st.markdown("### Descriptive Statistics")
-        st.dataframe(data.describe())
+    # Descriptive Statistics
+    st.markdown("### Descriptive Statistics")
+    st.dataframe(data.describe())
 
     # Data Visualization
     st.markdown("### Data Visualization")
@@ -91,10 +93,10 @@ if uploaded_file is not None:
         st.write(f"Error creating heatmap: {e}")
 
     # Choose columns for histogram
+    st.markdown("### Histograms")
     hist_columns = st.multiselect("Select columns for histogram", data.columns, key="hist_columns")
 
     if hist_columns:
-        st.markdown("#### Histograms")
         for column in hist_columns:
             fig, ax = plt.subplots(figsize=(10, 4))
             sns.histplot(data[column], kde=True, ax=ax)
@@ -158,60 +160,70 @@ if uploaded_file is not None:
 
     # Additional Charts
     st.markdown("### Additional Charts")
-    selected_charts = st.multiselect("Select chart types",
-                                     ["Bar Chart", "Pie Chart", "Sunkey Diagram",
-                                      "100% Stacked Bar Chart", "Stacked Vertical Bar Chart",
-                                      "Line Chart"])
 
     for chart_type in selected_charts:
         st.markdown(f"### {chart_type}")  # Display the chart type as a header
 
         if chart_type == "Bar Chart":
-            column_x = st.selectbox("Select X axis for Bar Chart", data.columns, key=f"bar_x_{chart_type}")
-            column_y = st.selectbox("Select Y axis for Bar Chart", data.columns, key=f"bar_y_{chart_type}")
+            column_x = st.selectbox("Select X axis for Bar Chart", data.columns,
+                                    key=f"bar_x_{chart_type}", value=data.columns[0])
+            column_y = st.selectbox("Select Y axis for Bar Chart", data.columns,
+                                    key=f"bar_y_{chart_type}", value=data.columns[1] if len(data.columns) > 1 else data.columns[0])
             if column_x and column_y:
                 fig = px.bar(data, x=column_x, y=column_y)
                 st.plotly_chart(fig)
 
         elif chart_type == "Pie Chart":
-            column = st.selectbox("Select column for Pie Chart", data.columns, key=f"pie_{chart_type}")
+            column = st.selectbox("Select column for Pie Chart", data.columns,
+                                  key=f"pie_{chart_type}", value=data.columns[0])
             if column:
                 fig = px.pie(data, names=column)
                 st.plotly_chart(fig)
 
         elif chart_type == "Sunkey Diagram":
-            source = st.selectbox("Select source column for Sunkey Diagram", data.columns, key=f"sunkey_source_{chart_type}")
-            target = st.selectbox("Select target column for Sunkey Diagram", data.columns, key=f"sunkey_target_{chart_type}")
-            values = st.selectbox("Select values column for Sunkey Diagram", data.columns, key=f"sunkey_values_{chart_type}")
+            source = st.selectbox("Select source column for Sunkey Diagram", data.columns,
+                                  key=f"sunkey_source_{chart_type}", value=data.columns[0])
+            target = st.selectbox("Select target column for Sunkey Diagram", data.columns,
+                                  key=f"sunkey_target_{chart_type}", value=data.columns[1] if len(data.columns) > 1 else data.columns[0])
+            values = st.selectbox("Select values column for Sunkey Diagram", data.columns,
+                                  key=f"sunkey_values_{chart_type}", value=data.columns[2] if len(data.columns) > 2 else data.columns[0])
             if source and target and values:
                 fig = px.sunburst(data, path=[source, target], values=values)
                 st.plotly_chart(fig)
 
         elif chart_type == "100% Stacked Bar Chart":
-            column_x = st.selectbox("Select X axis for 100% Stacked Bar Chart", data.columns, key=f"stacked100_x_{chart_type}")
-            column_y = st.selectbox("Select Y axis for 100% Stacked Bar Chart", data.columns, key=f"stacked100_y_{chart_type}")
-            color = st.selectbox("Select color column for 100% Stacked Bar Chart", data.columns, key=f"stacked100_color_{chart_type}")
+            column_x = st.selectbox("Select X axis for 100% Stacked Bar Chart", data.columns,
+                                    key=f"stacked100_x_{chart_type}", value=data.columns[0])
+            column_y = st.selectbox("Select Y axis for 100% Stacked Bar Chart", data.columns,
+                                    key=f"stacked100_y_{chart_type}", value=data.columns[1] if len(data.columns) > 1 else data.columns[0])
+            color = st.selectbox("Select color column for 100% Stacked Bar Chart", data.columns,
+                                 key=f"stacked100_color_{chart_type}", value=data.columns[2] if len(data.columns) > 2 else data.columns[0])
             if column_x and column_y and color:
                 # Group data and calculate percentages
                 grouped = data.groupby([column_x, color])[column_y].sum().unstack().fillna(0)
                 grouped = grouped.div(grouped.sum(axis=1), axis=0) * 100
                 fig = px.bar(grouped, x=grouped.index, y=grouped.columns,
                              labels={'value': 'Percentage'},
-                             title='100% Stacked Bar Chart')
+                title='100% Stacked Bar Chart')
                 st.plotly_chart(fig)
 
         elif chart_type == "Stacked Vertical Bar Chart":
-            column_x = st.selectbox("Select X axis for Stacked Vertical Bar Chart", data.columns, key=f"vertstacked_x_{chart_type}")
-            column_y = st.selectbox("Select Y axis for Stacked Vertical Bar Chart", data.columns, key=f"vertstacked_y_{chart_type}")
-            color = st.selectbox("Select color column for Stacked Vertical Bar Chart", data.columns, key=f"vertstacked_color_{chart_type}")
+            column_x = st.selectbox("Select X axis for Stacked Vertical Bar Chart", data.columns,
+                                    key=f"vertstacked_x_{chart_type}", value=data.columns[0])
+            column_y = st.selectbox("Select Y axis for Stacked Vertical Bar Chart", data.columns,
+                                    key=f"vertstacked_y_{chart_type}", value=data.columns[1] if len(data.columns) > 1 else data.columns[0])
+            color = st.selectbox("Select color column for Stacked Vertical Bar Chart", data.columns,
+                                 key=f"vertstacked_color_{chart_type}", value=data.columns[2] if len(data.columns) > 2 else data.columns[0])
             if column_x and column_y and color:
                 fig = px.bar(data, x=column_x, y=column_y, color=color,
                              title='Stacked Vertical Bar Chart')
                 st.plotly_chart(fig)
 
         elif chart_type == "Line Chart":
-            column_x = st.selectbox("Select X axis for Line Chart", data.columns, key=f"line_x_{chart_type}")
-            column_y = st.selectbox("Select Y axis for Line Chart", data.columns, key=f"line_y_{chart_type}")
+            column_x = st.selectbox("Select X axis for Line Chart", data.columns,
+                                    key=f"line_x_{chart_type}", value=data.columns[0])
+            column_y = st.selectbox("Select Y axis for Line Chart", data.columns,
+                                    key=f"line_y_{chart_type}", value=data.columns[1] if len(data.columns) > 1 else data.columns[0])
             if column_x and column_y:
                 fig = px.line(data, x=column_x, y=column_y,
                               title='Line Chart')
