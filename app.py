@@ -21,7 +21,7 @@ st.markdown("""
     <style>
         body {
             color: #fff;
-            background-color: #DC143C;
+            background-color: #262730;
         }
         .stApp {
             background-color: #262730;
@@ -38,6 +38,13 @@ with st.sidebar:
     st.header("Settings")
     show_data = st.checkbox("Show Data Preview", value=True)
     show_descriptive_stats = st.checkbox("Show Descriptive Statistics", value=True)
+    st.header("Chart Settings")
+    selected_charts = st.multiselect(
+        "Select chart types",
+        ["Bar Chart", "Pie Chart", "Sunkey Diagram",
+         "100% Stacked Bar Chart", "Stacked Vertical Bar Chart",
+         "Line Chart"]
+    )
 
 # Load the dataset
 @st.cache_data  # Cache the data to avoid reloading on every interaction
@@ -54,12 +61,12 @@ if uploaded_file is not None:
     file_type = uploaded_file.name.split('.')[-1].lower()
     data = load_data(uploaded_file, file_type)
 
-    # Display data preview if checked
+    # Display data preview
     if show_data:
         st.markdown("### Data Preview")
         st.dataframe(data.head())
 
-    # Display descriptive statistics if checked
+    # Descriptive Statistics
     if show_descriptive_stats:
         st.markdown("### Descriptive Statistics")
         st.dataframe(data.describe())
@@ -91,10 +98,10 @@ if uploaded_file is not None:
         st.write(f"Error creating heatmap: {e}")
 
     # Choose columns for histogram
+    st.markdown("### Histograms")
     hist_columns = st.multiselect("Select columns for histogram", data.columns, key="hist_columns")
 
     if hist_columns:
-        st.markdown("#### Histograms")
         for column in hist_columns:
             fig, ax = plt.subplots(figsize=(10, 4))
             sns.histplot(data[column], kde=True, ax=ax)
@@ -158,10 +165,6 @@ if uploaded_file is not None:
 
     # Additional Charts
     st.markdown("### Additional Charts")
-    selected_charts = st.multiselect("Select chart types",
-                                     ["Bar Chart", "Pie Chart", "Sunkey Diagram",
-                                      "100% Stacked Bar Chart", "Stacked Vertical Bar Chart",
-                                      "Line Chart"])
 
     for chart_type in selected_charts:
         st.markdown(f"### {chart_type}")  # Display the chart type as a header
