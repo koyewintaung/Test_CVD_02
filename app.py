@@ -120,10 +120,33 @@ if uploaded_file is not None:
     st.markdown("### Correlation Heatmap")
     try:
         fig, ax = plt.subplots(figsize=(12, 10))
-        sns.heatmap(data_numeric.corr(), annot=True, cmap="coolwarm", linewidths=.5, ax=ax)
+        sns.heatmap(data_numeric.corr(),
+                    annot=True,
+                    cmap="coolwarm",
+                    linewidths=.5,
+                    ax=ax,
+                    fmt=".2f",  # Format to 2 decimal places
+                    annot_kws={"size": 8})  # Adjust font size
         st.pyplot(fig)
     except Exception as e:
         st.write(f"Error creating heatmap: {e}")
+
+    corr = data_numeric.corr()
+    mask = np.abs(corr) < 0.5  # Example threshold
+    corr = corr.mask(mask)
+    fig, ax = plt.subplots(figsize=(12, 10))
+    sns.heatmap(corr, annot=True, cmap="coolwarm", linewidths=.5, ax=ax, fmt=".2f")
+    st.pyplot(fig)
+
+
+    import plotly.graph_objects as go
+    correlation_matrix = data_numeric.corr()
+    fig = go.Figure(data=go.Heatmap(
+            z=correlation_matrix,
+            x=correlation_matrix.columns,
+            y=correlation_matrix.columns,
+            colorscale='coolwarm'))
+    st.plotly_chart(fig)
 
     # Choose columns for histogram
     st.markdown("### Histograms")
