@@ -89,6 +89,13 @@ if uploaded_file is not None:
     file_type = uploaded_file.name.split('.')[-1].lower()
     data = load_data(uploaded_file, file_type)
 
+    # Sidebar for column selection
+    with st.sidebar:
+        selected_columns = st.multiselect("Select columns for heatmap", data.columns.tolist(), default=data.columns.tolist())
+
+    # Data preprocessing based on selected columns
+    data_numeric = data[selected_columns].select_dtypes(include=['number']).fillna(0)
+
     # Display data preview
     if show_data:
         st.markdown("### Data Preview")
@@ -110,48 +117,22 @@ if uploaded_file is not None:
     non_numeric_cols = data.select_dtypes(exclude=['number']).columns
     st.write("Non-numeric columns:", non_numeric_cols)
 
-    # Remove non-numeric columns
-    data_numeric = data.drop(non_numeric_cols, axis=1, errors='ignore')
-
     # Handle missing values
-    data_numeric = data_numeric.fillna(0)
+    # data_numeric = data_numeric.fillna(0)
 
     # Correlation heatmap
     st.markdown("### Correlation Heatmap")
     try:
-        fig, ax = plt.subplots(figsize=(12, 10))
-        sns.heatmap(data_numeric.corr(),
-                    annot=True,
-                    cmap="coolwarm",
-                    linewidths=.5,
-                    ax=ax,
-                    fmt=".2f",  # Format to 2 decimal places
-                    annot_kws={"size": 8})  # Adjust font size
-        st.pyplot(fig)
+        import plotly.graph_objects as go
+        correlation_matrix = data_numeric.corr()
+        fig = go.Figure(data=go.Heatmap(
+                z=correlation_matrix,
+                x=correlation_matrix.columns,
+                y=correlation_matrix.columns,
+                colorscale='coolwarm'))
+        st.plotly_chart(fig)
     except Exception as e:
         st.write(f"Error creating heatmap: {e}")
-
-    corr = data_numeric.corr()
-    mask = np.abs(corr) < 0.5  # Example threshold
-    corr = corr.mask(mask)
-    fig, ax = plt.subplots(figsize=(12, 10))
-    sns.heatmap(corr, annot=True, cmap="coolwarm", linewidths=.5, ax=ax, fmt=".2f")
-    st.pyplot(fig)
-
-    with st.sidebar:
-        selected_columns = st.multiselect("Select columns for heatmap", data.columns.tolist(), default=data.columns.tolist())
-    # ... after data loading ...
-    data_numeric = data[selected_columns].select_dtypes(include=['number']).fillna(0)
-
-
-    import plotly.graph_objects as go
-    correlation_matrix = data_numeric.corr()
-    fig = go.Figure(data=go.Heatmap(
-            z=correlation_matrix,
-            x=correlation_matrix.columns,
-            y=correlation_matrix.columns,
-            colorscale='coolwarm'))
-    st.plotly_chart(fig)
 
     # Choose columns for histogram
     st.markdown("### Histograms")
