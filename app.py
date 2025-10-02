@@ -138,6 +138,11 @@ if uploaded_file is not None:
     sns.heatmap(corr, annot=True, cmap="coolwarm", linewidths=.5, ax=ax, fmt=".2f")
     st.pyplot(fig)
 
+    with st.sidebar:
+        selected_columns = st.multiselect("Select columns for heatmap", data.columns.tolist(), default=data.columns.tolist())
+    # ... after data loading ...
+    data_numeric = data[selected_columns].select_dtypes(include=['number']).fillna(0)
+
 
     import plotly.graph_objects as go
     correlation_matrix = data_numeric.corr()
